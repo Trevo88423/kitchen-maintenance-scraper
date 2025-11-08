@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kitchen Maintenance Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .upload-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .upload-btn {
+            background: #667eea;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .stat-card h3 {
+            color: #666;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .label {
+            color: #999;
+            font-size: 14px;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .chart-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .chart-card h3 {
+            color: #333;
+            font-size: 18px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .table-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        .filters {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .filters h3 {
+            color: #333;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #e0e0e0;
+            position: sticky;
+            top: 0;
+        }
+
+        table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #666;
+        }
+
+        table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-complete {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-incomplete {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-delivered {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .file-label {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-label:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .export-btn {
+            background: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: all 0.3s;
+        }
+
+        .export-btn:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1>🔧 Kitchen Maintenance Dashboard</h1>
+                    <p>View and analyze maintenance job data</p>
+                </div>
+                <button id="backToPortal" class="upload-btn" style="display: none; background: #6c757d;">
+                    ← Back to Portal
+                </button>
+            </div>
+        </div>
+
+        <div class="upload-section" id="uploadSection">
+            <h2 style="margin-bottom: 15px; color: #333;">Upload CSV Data</h2>
+            <p style="margin-bottom: 20px; color: #666;">Select the CSV file exported from the TamperMonkey script</p>
+            <input type="file" id="fileInput" accept=".csv" />
+            <label for="fileInput" class="file-label">Choose CSV File</label>
+            <p id="fileName" style="margin-top: 15px; color: #666; font-size: 14px;"></p>
+        </div>
+
+        <div id="dashboardContent" class="hidden">
+            <div class="filters">
+                <h3>Filters</h3>
+                <div class="filter-group">
+                    <input type="text" id="searchInput" placeholder="Search by name, suburb, or job number..." style="flex: 1; min-width: 300px;">
+                    <select id="suburbFilter">
+                        <option value="">All Suburbs</option>
+                    </select>
+                    <select id="statusFilter">
+                        <option value="">All Status</option>
+                        <option value="complete">Complete</option>
+                        <option value="incomplete">Incomplete</option>
+                    </select>
+                    <button class="export-btn" onclick="exportFilteredData()">Export Filtered</button>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Jobs</h3>
+                    <div class="number" id="totalJobs">0</div>
+                    <div class="label">Active maintenance jobs</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Items</h3>
+                    <div class="number" id="totalItems">0</div>
+                    <div class="label">Maintenance items</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Items Delivered</h3>
+                    <div class="number" id="itemsDelivered">0</div>
+                    <div class="label">With delivery dates</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="deliveryProgress"></div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <h3>Completion Rate</h3>
+                    <div class="number" id="completionRate">0%</div>
+                    <div class="label">Jobs fully complete</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="completionProgress"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3>Jobs by Suburb</h3>
+                    <canvas id="suburbChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Delivery Status</h3>
+                    <canvas id="deliveryChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Items by Status</h3>
+                    <canvas id="statusChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Jobs Timeline</h3>
+                    <canvas id="timelineChart"></canvas>
+                </div>
+            </div>
+
+            <div class="table-card">
+                <h3 style="margin-bottom: 20px;">Job Details</h3>
+                <table id="jobsTable">
+                    <thead>
+                        <tr>
+                            <th>Job Number</th>
+                            <th>Name</th>
+                            <th>Suburb</th>
+                            <th>Mobile</th>
+                            <th>Total Items</th>
+                            <th>Delivered</th>
+                            <th>Status</th>
+                            <th>Completion</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allData = [];
+        let filteredData = [];
+        let charts = {};
+
+        // Check for data in localStorage on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            const storedData = localStorage.getItem('dashboardData');
+            if (storedData) {
+                const timestamp = localStorage.getItem('dashboardTimestamp');
+                const date = timestamp ? new Date(timestamp).toLocaleString() : 'Unknown';
+
+                // Show back button
+                document.getElementById('backToPortal').style.display = 'block';
+
+                // Auto-load the data
+                parseCSV(storedData);
+                document.getElementById('uploadSection').classList.add('hidden');
+                document.getElementById('dashboardContent').classList.remove('hidden');
+
+                console.log('Loaded data from portal:', date);
+            }
+        });
+
+        // Back to portal button
+        document.getElementById('backToPortal').addEventListener('click', function() {
+            if (confirm('Return to the portal? (Data will remain saved)')) {
+                window.close(); // Close the tab
+                // If window.close doesn't work (some browsers block it)
+                setTimeout(() => {
+                    window.location.href = 'https://trades.kitchengroup.com.au/Trades/MyJobs_Maintenance.aspx';
+                }, 100);
+            }
+        });
+
+        // File upload handler
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('fileName').textContent = `Loading: ${file.name}`;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    parseCSV(e.target.result);
+                    document.getElementById('uploadSection').classList.add('hidden');
+                    document.getElementById('dashboardContent').classList.remove('hidden');
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        // Parse CSV
+        function parseCSV(csv) {
+            const lines = csv.split('\n');
+            const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+
+            const jobs = {};
+
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+
+                const values = parseCSVLine(lines[i]);
+                if (values.length < headers.length) continue;
+
+                const row = {};
+                headers.forEach((header, index) => {
+                    row[header] = values[index] ? values[index].replace(/"/g, '').trim() : '';
+                });
+
+                const jobNum = row['Job Number'];
+                if (!jobNum) continue;
+
+                if (!jobs[jobNum]) {
+                    jobs[jobNum] = {
+                        jobNumber: jobNum,
+                        name: row['Maker Name'],
+                        mobile: row['Mobile'],
+                        email: row['Email'],
+                        address: row['Site Address'],
+                        suburb: row['Suburb'],
+                        totalItems: parseInt(row['Total Maintenance Items']) || 0,
+                        itemsWithDelivery: parseInt(row['Items With Delivery']) || 0,
+                        incompleteCount: parseInt(row['Incomplete Items Count']) || 0,
+                        allComplete: row['All Items Complete'] === 'true',
+                        items: []
+                    };
+                }
+
+                if (row['Item Name'] && row['Item Name'] !== 'No maintenance items') {
+                    jobs[jobNum].items.push({
+                        name: row['Item Name'],
+                        reason: row['Reason'],
+                        dateCreated: row['Date Created'],
+                        deliveryInfo: row['Delivery Info'],
+                        hasMarkComplete: row['Item Has Mark Complete Button'] === 'Yes'
+                    });
+                }
+            }
+
+            allData = Object.values(jobs);
+            filteredData = allData;
+
+            renderDashboard();
+        }
+
+        // Parse CSV line (handles quoted fields)
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current);
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            result.push(current);
+
+            return result;
+        }
+
+        // Render dashboard
+        function renderDashboard() {
+            updateStats();
+            renderCharts();
+            renderTable();
+            populateFilters();
+        }
+
+        // Update statistics
+        function updateStats() {
+            const totalJobs = filteredData.length;
+            const totalItems = filteredData.reduce((sum, job) => sum + job.totalItems, 0);
+            const itemsDelivered = filteredData.reduce((sum, job) => sum + job.itemsWithDelivery, 0);
+            const completeJobs = filteredData.filter(job => job.allComplete).length;
+
+            document.getElementById('totalJobs').textContent = totalJobs;
+            document.getElementById('totalItems').textContent = totalItems;
+            document.getElementById('itemsDelivered').textContent = itemsDelivered;
+
+            const deliveryPercent = totalItems > 0 ? (itemsDelivered / totalItems * 100).toFixed(0) : 0;
+            const completionPercent = totalJobs > 0 ? (completeJobs / totalJobs * 100).toFixed(0) : 0;
+
+            document.getElementById('completionRate').textContent = completionPercent + '%';
+            document.getElementById('deliveryProgress').style.width = deliveryPercent + '%';
+            document.getElementById('completionProgress').style.width = completionPercent + '%';
+        }
+
+        // Render charts
+        function renderCharts() {
+            // Destroy existing charts
+            Object.values(charts).forEach(chart => chart.destroy());
+
+            // Suburb distribution
+            const suburbCounts = {};
+            filteredData.forEach(job => {
+                const suburb = job.suburb || 'Unknown';
+                suburbCounts[suburb] = (suburbCounts[suburb] || 0) + 1;
+            });
+
+            const topSuburbs = Object.entries(suburbCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+
+            charts.suburb = new Chart(document.getElementById('suburbChart'), {
+                type: 'bar',
+                data: {
+                    labels: topSuburbs.map(s => s[0]),
+                    datasets: [{
+                        label: 'Jobs',
+                        data: topSuburbs.map(s => s[1]),
+                        backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+
+            // Delivery status
+            const totalItems = filteredData.reduce((sum, job) => sum + job.totalItems, 0);
+            const delivered = filteredData.reduce((sum, job) => sum + job.itemsWithDelivery, 0);
+            const notDelivered = totalItems - delivered;
+
+            charts.delivery = new Chart(document.getElementById('deliveryChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Delivered', 'Not Delivered'],
+                    datasets: [{
+                        data: [delivered, notDelivered],
+                        backgroundColor: [
+                            'rgba(40, 167, 69, 0.8)',
+                            'rgba(255, 193, 7, 0.8)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true
+                }
+            });
+
+            // Status distribution
+            const complete = filteredData.filter(j => j.allComplete).length;
+            const incomplete = filteredData.length - complete;
+
+            charts.status = new Chart(document.getElementById('statusChart'), {
+                type: 'pie',
+                data: {
+                    labels: ['Complete', 'Incomplete'],
+                    datasets: [{
+                        data: [complete, incomplete],
+                        backgroundColor: [
+                            'rgba(40, 167, 69, 0.8)',
+                            'rgba(220, 53, 69, 0.8)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true
+                }
+            });
+
+            // Timeline (items per job)
+            const itemsPerJob = filteredData.map((job, i) => ({
+                x: i + 1,
+                y: job.totalItems,
+                delivered: job.itemsWithDelivery
+            }));
+
+            charts.timeline = new Chart(document.getElementById('timelineChart'), {
+                type: 'line',
+                data: {
+                    labels: filteredData.map((j, i) => i + 1),
+                    datasets: [{
+                        label: 'Total Items',
+                        data: itemsPerJob.map(d => d.y),
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }, {
+                        label: 'Delivered',
+                        data: itemsPerJob.map(d => d.delivered),
+                        borderColor: 'rgba(40, 167, 69, 1)',
+                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        // Render table
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            filteredData.forEach(job => {
+                const row = document.createElement('tr');
+
+                const deliveryPercent = job.totalItems > 0
+                    ? (job.itemsWithDelivery / job.totalItems * 100).toFixed(0)
+                    : 0;
+
+                const statusClass = job.allComplete ? 'status-complete' : 'status-incomplete';
+                const statusText = job.allComplete ? 'Complete' : 'Incomplete';
+
+                row.innerHTML = `
+                    <td><strong>${job.jobNumber}</strong></td>
+                    <td>${job.name}</td>
+                    <td>${job.suburb || 'N/A'}</td>
+                    <td>${job.mobile}</td>
+                    <td>${job.totalItems}</td>
+                    <td>
+                        <span class="status-delivered">${job.itemsWithDelivery} / ${job.totalItems}</span>
+                    </td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                    <td>${deliveryPercent}%</td>
+                `;
+
+                tbody.appendChild(row);
+            });
+        }
+
+        // Populate filter dropdowns
+        function populateFilters() {
+            const suburbs = [...new Set(allData.map(j => j.suburb).filter(Boolean))].sort();
+            const suburbSelect = document.getElementById('suburbFilter');
+
+            suburbSelect.innerHTML = '<option value="">All Suburbs</option>';
+            suburbs.forEach(suburb => {
+                const option = document.createElement('option');
+                option.value = suburb;
+                option.textContent = suburb;
+                suburbSelect.appendChild(option);
+            });
+        }
+
+        // Apply filters
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const suburb = document.getElementById('suburbFilter').value;
+            const status = document.getElementById('statusFilter').value;
+
+            filteredData = allData.filter(job => {
+                const matchesSearch = !searchTerm ||
+                    job.name.toLowerCase().includes(searchTerm) ||
+                    job.suburb.toLowerCase().includes(searchTerm) ||
+                    job.jobNumber.toLowerCase().includes(searchTerm);
+
+                const matchesSuburb = !suburb || job.suburb === suburb;
+
+                const matchesStatus = !status ||
+                    (status === 'complete' && job.allComplete) ||
+                    (status === 'incomplete' && !job.allComplete);
+
+                return matchesSearch && matchesSuburb && matchesStatus;
+            });
+
+            renderDashboard();
+        }
+
+        // Export filtered data
+        function exportFilteredData() {
+            const csv = generateCSV(filteredData);
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `filtered-jobs-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Generate CSV from data
+        function generateCSV(data) {
+            const headers = ['Job Number', 'Name', 'Suburb', 'Mobile', 'Email', 'Address', 'Total Items', 'Items Delivered', 'Incomplete Items', 'Status'];
+            const rows = data.map(job => [
+                job.jobNumber,
+                job.name,
+                job.suburb,
+                job.mobile,
+                job.email,
+                job.address,
+                job.totalItems,
+                job.itemsWithDelivery,
+                job.incompleteCount,
+                job.allComplete ? 'Complete' : 'Incomplete'
+            ].map(v => `"${v}"`).join(','));
+
+            return [headers.join(','), ...rows].join('\n');
+        }
+
+        // Event listeners
+        document.getElementById('searchInput').addEventListener('input', applyFilters);
+        document.getElementById('suburbFilter').addEventListener('change', applyFilters);
+        document.getElementById('statusFilter').addEventListener('change', applyFilters);
+    </script>
+</body>
+</html>

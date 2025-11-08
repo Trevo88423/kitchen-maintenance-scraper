@@ -1,0 +1,19 @@
+# CSV Reports
+*.csv
+
+# Node modules (if we add any)
+node_modules/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Backup files
+*.bak
+*~
+
+# TamperMonkey backup files
+*.backup.user.js
+
+# Personal config
+config.local.js

@@ -18,7 +18,7 @@ Complete TamperMonkey solution for managing kitchen maintenance jobs with auto-p
 
 ### Desktop (Chrome/Edge/Firefox)
 1. Install [TamperMonkey extension](https://www.tampermonkey.net/)
-2. Click this link to install: [Kitchen Maintenance - Supabase Sync](https://raw.githubusercontent.com/YOUR_USERNAME/kitchen-maintenance-scraper/main/kitchen-portal-to-supabase.user.js)
+2. Click this link to install: [Kitchen Maintenance - Supabase Sync](https://raw.githubusercontent.com/Trevo88423/kitchen-maintenance-scraper/main/kitchen-portal-to-supabase.user.js)
 3. Click "Install" when TamperMonkey prompts
 4. Done! The script will auto-update when new versions are released
 
@@ -107,7 +107,7 @@ The script checks for updates automatically! TamperMonkey will:
 ### Manual Update Methods
 
 **Method 1: Reinstall from GitHub**
-1. Click the [install link](https://raw.githubusercontent.com/YOUR_USERNAME/kitchen-maintenance-scraper/main/kitchen-portal-to-supabase.user.js)
+1. Click the [install link](https://raw.githubusercontent.com/Trevo88423/kitchen-maintenance-scraper/main/kitchen-portal-to-supabase.user.js)
 2. TamperMonkey will detect it's an update and replace the old version
 
 **Method 2: Git Pull**

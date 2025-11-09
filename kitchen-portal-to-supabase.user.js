@@ -11,8 +11,8 @@
 // @grant        GM_xmlhttpRequest
 // @connect      ugqahhbopqkhbyozsbfo.supabase.co
 // @run-at       document-idle
-// @updateURL    https://raw.githubusercontent.com/YOUR_USERNAME/kitchen-maintenance-scraper/main/kitchen-portal-to-supabase.user.js
-// @downloadURL  https://raw.githubusercontent.com/YOUR_USERNAME/kitchen-maintenance-scraper/main/kitchen-portal-to-supabase.user.js
+// @updateURL    https://raw.githubusercontent.com/Trevo88423/kitchen-maintenance-scraper/main/kitchen-portal-to-supabase.user.js
+// @downloadURL  https://raw.githubusercontent.com/Trevo88423/kitchen-maintenance-scraper/main/kitchen-portal-to-supabase.user.js
 // ==/UserScript==
 
 (function() {

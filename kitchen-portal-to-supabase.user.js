@@ -1,10 +1,11 @@
 // ==UserScript==
 // @name         Kitchen Maintenance - Supabase Sync
 // @namespace    http://tampermonkey.net/
-// @version      4.2
+// @version      4.3
 // @description  Scrape maintenance jobs and sync to Supabase database
 // @author       TPB Kitchens
 // @match        https://trades.kitchengroup.com.au/Trades/MyJobs_Maintenance.aspx*
+// @match        https://trades.kitchengroup.com.au/Trades/MyJobs_Maintenance_Detail.aspx*
 // @match        https://trades.kitchengroup.com.au/Trades/MyJobs.aspx?JobNumber=*
 // @grant        GM_setValue
 // @grant        GM_getValue
@@ -43,7 +44,8 @@
     }
 
     function isMainPage() {
-        return window.location.href.includes('MyJobs_Maintenance.aspx');
+        return window.location.href.includes('MyJobs_Maintenance.aspx') &&
+               !window.location.href.includes('MyJobs_Maintenance_Detail.aspx');
     }
 
     // Supabase API call

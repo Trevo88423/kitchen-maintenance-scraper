@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Kitchen Maintenance - Supabase Sync
 // @namespace    http://tampermonkey.net/
-// @version      4.3
+// @version      4.4
 // @description  Scrape maintenance jobs and sync to Supabase database
 // @author       TPB Kitchens
 // @match        https://trades.kitchengroup.com.au/Trades/MyJobs_Maintenance.aspx*
@@ -46,6 +46,15 @@
     function isMainPage() {
         return window.location.href.includes('MyJobs_Maintenance.aspx') &&
                !window.location.href.includes('MyJobs_Maintenance_Detail.aspx');
+    }
+
+    // Convert DD/MM/YYYY to YYYY-MM-DD
+    function convertDateToISO(dateStr) {
+        if (!dateStr) return null;
+        const match = dateStr.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+        if (!match) return null;
+        const [, day, month, year] = match;
+        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
     }
 
     // Supabase API call
@@ -172,19 +181,15 @@
                     // Check if delivered (has "Despatched On:" text)
                     const isDelivered = deliveryInfo.includes('Despatched');
 
-                    // Extract delivery date if present
-                    let deliveryDate = null;
-                    const dateMatch = deliveryInfo.match(/(\d{1,2}\/\d{1,2}\/\d{4})/);
-                    if (dateMatch) {
-                        // Convert DD/MM/YYYY to YYYY-MM-DD for database
-                        const parts = dateMatch[1].split('/');
-                        deliveryDate = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
-                    }
+                    // Extract and convert dates
+                    const dateCreatedRaw = cells[3]?.textContent.trim() || '';
+                    const dateCreated = convertDateToISO(dateCreatedRaw);
+                    const deliveryDate = convertDateToISO(deliveryInfo);
 
                     items.push({
                         item_name: itemName,
                         reason: cells[2]?.textContent.trim() || '',
-                        date_created: cells[3]?.textContent.trim() || '',
+                        date_created: dateCreated,
                         delivery_info: deliveryInfo,
                         delivery_date: deliveryDate,
                         is_delivered: isDelivered

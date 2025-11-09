@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Kitchen Maintenance - Supabase Sync
 // @namespace    http://tampermonkey.net/
-// @version      4.1
+// @version      4.2
 // @description  Scrape maintenance jobs and sync to Supabase database
 // @author       TPB Kitchens
 // @match        https://trades.kitchengroup.com.au/Trades/MyJobs_Maintenance.aspx*
@@ -98,13 +98,21 @@
 
     // Extract job details from detail page
     function extractJobDetails() {
+        log('=== EXTRACTING JOB DETAILS ===');
         const pageText = document.body.textContent;
+        log('Page text length:', pageText.length);
 
         const nameMatch = pageText.match(/Name:\s*([^\n]+)/);
         const jobMatch = pageText.match(/Job Number:\s*(\w+\d+)/);
         const mobileMatch = pageText.match(/Mobile:\s*([\d\s]+)/);
         const emailMatch = pageText.match(/Email:\s*([\w.-]+@[\w.-]+\.\w+)/);
         const addressMatch = pageText.match(/Site Address:\s*([^\n]+(?:\n[^\n]+)?)/);
+
+        log('Name match:', nameMatch);
+        log('Job match:', jobMatch);
+        log('Mobile match:', mobileMatch);
+        log('Email match:', emailMatch);
+        log('Address match:', addressMatch);
 
         let suburb = '';
         let address = '';
@@ -114,6 +122,9 @@
             if (suburbMatch) suburb = suburbMatch[1].trim();
         }
 
+        log('Extracting maintenance items...');
+        const items = extractMaintenanceItems();
+
         const details = {
             job_number: jobMatch ? jobMatch[1].trim() : '',
             client_name: nameMatch ? nameMatch[1].trim() : '',
@@ -121,7 +132,7 @@
             email: emailMatch ? emailMatch[1].trim() : '',
             site_address: address,
             suburb: suburb,
-            items: extractMaintenanceItems()
+            items: items
         };
 
         log('Extracted job details:', details);
@@ -357,11 +368,17 @@
 
     // Continue auto-processing
     async function continueAutoProcessing() {
+        log('=== CONTINUE AUTO PROCESSING ===');
         const jobLinks = GM_getValue('jobLinks', []);
         const currentIndex = GM_getValue('currentJobIndex', 0);
         processedCount = GM_getValue('processedCount', 0);
 
+        log('Job Links:', jobLinks);
+        log('Current Index:', currentIndex);
+        log('Processed Count:', processedCount);
+
         if (jobLinks.length === 0 || currentIndex >= jobLinks.length) {
+            log('Processing complete or no jobs found');
             GM_setValue('isAutoProcessing', false);
             GM_setValue('jobLinks', []);
             GM_setValue('currentJobIndex', 0);
@@ -371,12 +388,18 @@
             return;
         }
 
+        log('Extracting job details from current page...');
         const jobData = extractJobDetails();
+        log('Extracted job data:', jobData);
+
+        log('Saving to Supabase...');
         const saved = await saveJobToSupabase(jobData);
+        log('Save result:', saved);
 
         if (saved) {
             processedCount++;
             GM_setValue('processedCount', processedCount);
+            log('Showing job summary...');
             await showJobSummary(jobData);
         }
 
@@ -384,9 +407,13 @@
         GM_setValue('currentJobIndex', nextIndex);
 
         if (nextIndex < jobLinks.length) {
+            log(`Moving to next job: ${nextIndex + 1}/${jobLinks.length}`);
+            log('Next URL:', jobLinks[nextIndex].url);
             updateUI(`Syncing ${nextIndex + 1}/${jobLinks.length}...`);
+            await sleep(1000); // Small delay before navigation
             window.location.href = jobLinks[nextIndex].url;
         } else {
+            log('All jobs processed!');
             GM_setValue('isAutoProcessing', false);
             alert(`✓ Sync complete!\n\nProcessed ${processedCount} jobs\n\nView them in your web app!`);
             window.location.href = 'https://trades.kitchengroup.com.au/Trades/MyJobs_Maintenance.aspx';
@@ -495,17 +522,28 @@
 
     // Initialize
     function init() {
+        log('=== INITIALIZATION ===');
         log('Initializing Supabase Sync');
         log('Current page:', window.location.href);
+        log('Is main page?', isMainPage());
 
         setTimeout(createControlPanel, 1000);
 
         const isAutoProcessing = GM_getValue('isAutoProcessing', false);
+        log('Is auto-processing active?', isAutoProcessing);
+
         if (!isMainPage() && isAutoProcessing) {
+            log('On detail page with auto-processing active - will start in 2 seconds');
             setTimeout(() => {
-                log('Auto-processing: Extracting and syncing...');
+                log('Starting auto-processing continuation...');
                 continueAutoProcessing();
             }, 2000);
+        } else if (!isMainPage() && !isAutoProcessing) {
+            log('On detail page but auto-processing not active');
+        } else if (isMainPage() && isAutoProcessing) {
+            log('On main page with auto-processing active - this should not happen');
+        } else {
+            log('On main page, waiting for user action');
         }
     }
 

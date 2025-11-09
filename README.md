@@ -1,22 +1,31 @@
 # Kitchen Maintenance Manager
 
-Complete TamperMonkey solution for managing kitchen maintenance jobs with auto-processing, job tracking, and email template generation.
+Complete TamperMonkey solution for managing kitchen maintenance jobs with auto-processing, Supabase sync, job tracking, and email template generation.
+
+> **Latest Version:** v4.1 - Now with Supabase database integration and web app support!
 
 ## 🚀 Features
 
-- **Auto-Process Jobs** - Automatically extract all maintenance data from the portal
-- **Job Manager** - Built-in dashboard for tracking job status
+- **Supabase Sync** - Automatically sync jobs to cloud database
+- **Auto-Process Jobs** - Extract all maintenance data from the portal
+- **Web App Integration** - View and manage jobs in admin portal
 - **Email Templates** - Generate ready-to-send emails for follow-ups and completions
+- **Delivery Tracking** - Automatically detect and track item delivery status
 - **Mobile-Friendly** - Works on phones, tablets, and desktop
-- **Cross-Device Sync** - Data saved in browser storage
+- **Auto-Updates** - TamperMonkey automatically checks for script updates
 
 ## 📱 Installation
 
 ### Desktop (Chrome/Edge/Firefox)
 1. Install [TamperMonkey extension](https://www.tampermonkey.net/)
-2. Click TamperMonkey icon → Dashboard → Create new script
-3. Copy contents of `kitchen-portal-scraper-complete.user.js`
-4. Paste and save (Ctrl+S)
+2. Click this link to install: [Kitchen Maintenance - Supabase Sync](https://raw.githubusercontent.com/YOUR_USERNAME/kitchen-maintenance-scraper/main/kitchen-portal-to-supabase.user.js)
+3. Click "Install" when TamperMonkey prompts
+4. Done! The script will auto-update when new versions are released
+
+**Manual Installation:**
+1. Open TamperMonkey Dashboard → Create new script
+2. Copy contents of `kitchen-portal-to-supabase.user.js`
+3. Paste and save (Ctrl+S)
 
 ### Mobile (Android - Kiwi Browser)
 1. Install **Kiwi Browser** from Play Store
@@ -89,27 +98,33 @@ Please provide expected delivery dates.
 
 ## 🔄 Updates
 
-### To Update the Script
+### Automatic Updates (Recommended)
+The script checks for updates automatically! TamperMonkey will:
+- Check GitHub for new versions every 24 hours
+- Notify you when updates are available
+- Auto-install updates (if enabled in TamperMonkey settings)
 
-**Method 1: Git Pull (Recommended)**
+### Manual Update Methods
+
+**Method 1: Reinstall from GitHub**
+1. Click the [install link](https://raw.githubusercontent.com/YOUR_USERNAME/kitchen-maintenance-scraper/main/kitchen-portal-to-supabase.user.js)
+2. TamperMonkey will detect it's an update and replace the old version
+
+**Method 2: Git Pull**
 ```bash
 cd "C:\Work project\data scrape scipt"
 git pull
 ```
-Then update the script in TamperMonkey with the new version.
-
-**Method 2: Manual Update**
-1. Download latest `kitchen-portal-scraper-complete.user.js`
-2. Open TamperMonkey → Find script
-3. Replace code with new version
-4. Save
+Then update the script in TamperMonkey with the new version from the file.
 
 ## 📁 Files
 
-### Main Script
-- **kitchen-portal-scraper-complete.user.js** - All-in-one TamperMonkey script
+### Main Scripts
+- **kitchen-portal-to-supabase.user.js** (v4.1) - Latest! Syncs to Supabase database ⭐ RECOMMENDED
+- **kitchen-portal-scraper-complete.user.js** (v3.0) - Standalone version with built-in job manager
+- **kitchen-portal-scraper.user.js** (v2.0) - Legacy version with CSV export
 
-### Additional Tools (Optional - Not Required)
+### Additional Tools (Optional - Legacy)
 - **dashboard.html** - Standalone dashboard with charts
 - **job-manager.html** - Standalone job manager
 - **open-dashboard.html** - Quick launcher
